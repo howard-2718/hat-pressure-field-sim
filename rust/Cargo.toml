@@ -4,5 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-num = "0.4.3"
+num = { version = "0.4.3", features = ["serde"] }
 scilib = "1.0.0"
+serde = "1.0.228"
+serde-pickle = "1.2.0"
+serde_derive = "1.0.228"
