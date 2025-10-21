@@ -1,5 +1,6 @@
 # Rust
 /rust/target/
+/rust/field.pickle
 
 # Python
 # The venv automatically gitignores itself
