@@ -6,6 +6,7 @@ use crate::{algo::p::{p, EMITTER_RADIUS, WAVE_LENGTH}, Point};
 #[derive(Debug)]
 pub struct Vec2D<T> {
     pub vec: Vec<T>,
+    #[allow(dead_code)] // Please stop bugging me, VS Code!
     pub len_i: usize,
     pub len_j: usize,
 }
@@ -46,6 +47,7 @@ impl Vec2D<()> {
 pub struct Hat {
     pub transducers: Vec<Point>,
     pub phase_res: f32,
+    #[allow(dead_code)] // Please stop bugging me, VS Code!
     pub z: f32,
     pub twin_cps: bool,
 }
