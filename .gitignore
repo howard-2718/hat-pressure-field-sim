@@ -1,0 +1,5 @@
+# Rust
+/rust/target/
+
+# Python
+# The venv automatically gitignores itself
