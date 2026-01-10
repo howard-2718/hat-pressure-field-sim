@@ -4,7 +4,7 @@ use std::f32::consts::PI;
 use scilib::math::bessel;
 
 pub static WAVE_LENGTH: f32 = 343.0 / 40000.0; // Speed of sound: 343 m/s
-const OMEGA: f32 = 2.0 * PI * WAVE_LENGTH;
+const OMEGA: f32 = 2.0 * PI * 40000.0; // Calculation for omega was previously incorrect
 const K: f32 = 2.0 * PI / WAVE_LENGTH;
 
 const P_0: f32 = 1.293; // Density of air
