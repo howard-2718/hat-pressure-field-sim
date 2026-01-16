@@ -73,6 +73,8 @@ fn main() {
     let nz_sep = zsize / nz as f32;
 
     // Print simulation range (optional, for verification)
+    println!("Simulation spatial range:");
+
     println!(
             "\nx: {}, {}",
             nx_sep / 2.0 + x0,
@@ -89,6 +91,8 @@ fn main() {
         (nz as f32 + nz_sep / 2.0) * nz_sep + z0
     );
 
+    println!("");
+
     // Initialize transducers
     let transducers: Vec<Point> = hat.transducers;
     let reflected_transducers: Vec<Point> = transducers
@@ -101,9 +105,12 @@ fn main() {
         .collect();
 
     let mut all_field = vec![vec![vec![vec![Complex::new(0.0, 0.0); nz]; ny]; nx]; frames.len()];
+    let mut all_times = vec![0.0; frames.len()];
 
     // Iterate over frames
     for (index, frame) in frames.iter().enumerate() {
+        println!("Currently solving for frame {}", index + 1);
+
         let mut field = vec![vec![vec![Complex::new(0.0, 0.0); nz]; ny]; nx];
 
         for x in 0..nx {
@@ -134,10 +141,19 @@ fn main() {
             }
         }
 
-        all_field[index] = field; // Note: times not saved (need to adjust to incorporate this)
+        all_field[index] = field;
+        all_times[index] = frame.t;
     }
 
+    println!("\nSaving fields to pickles...");
+
+    // Save fields to field.pickle
     let s = serde_pickle::to_vec(&all_field, Default::default()).unwrap();
     let mut file = std::fs::File::create("field.pickle").unwrap();
     file.write_all(&s).unwrap();
+
+    // Save times to time.pickle
+    let s_2 = serde_pickle::to_vec(&all_times, Default::default()).unwrap();
+    let mut file_2 = std::fs::File::create("time.pickle").unwrap();
+    file_2.write_all(&s_2).unwrap();
 }
