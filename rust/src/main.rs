@@ -8,26 +8,27 @@ use num::complex::Complex;
 use std::io::Write;
 use csv::ReaderBuilder;
 
+use std::time::Instant;
+
 fn main() {
+    let timer = Instant::now();
+
     let distance = 0.16; // Set height between transducers and reflective plate
     let hat = Hat::new(256.0, distance, false); // Initialize phase solver
 
     // Load in .csv file
     let base = env!("CARGO_MANIFEST_DIR");
-    let filename = format!("{}/pos/{}.csv", base, "test");
+    let filename = format!("{}/pos/{}.csv", base, "test2");
 
     // Read trajectory CSV file
     let mut reader = ReaderBuilder::new().has_headers(true).from_path(&filename).expect("Could not open trajectory data file!");
 
-    println!("Loading trajectory data...");
+    println!("\nLoading trajectory data...");
 
     // Define a "frame", containing a time value and transducer phase data
     #[derive(Debug)]
     struct Frame {
         t: f32,
-        x: f32,
-        y: f32,
-        z: f32,
         phases: Vec<f32>,
     }
 
@@ -50,10 +51,11 @@ fn main() {
 
         let phases = hat.run_hat(&cps);
 
-        frames.push(Frame { t, x, y, z, phases });
+        frames.push(Frame { t, phases });
     }
 
     println!("Loaded {} frames, with solved phases", frames.len());
+    println!("Current elapsed time: {:?}", timer.elapsed());
 
     // Set simulation range and spacing
     let x0 = 0.02;
@@ -73,7 +75,7 @@ fn main() {
     let nz_sep = zsize / nz as f32;
 
     // Print simulation range (optional, for verification)
-    println!("Simulation spatial range:");
+    println!("\nSimulation spatial range:");
 
     println!(
             "\nx: {}, {}",
@@ -86,12 +88,10 @@ fn main() {
         (ny as f32 + ny_sep / 2.0) * ny_sep + y0
     );
     println!(
-        "z: {}, {}",
+        "z: {}, {}\n",
         nz_sep / 2.0 + z0,
         (nz as f32 + nz_sep / 2.0) * nz_sep + z0
     );
-
-    println!("");
 
     // Initialize transducers
     let transducers: Vec<Point> = hat.transducers;
@@ -126,7 +126,6 @@ fn main() {
                         let vec_r = point - transducers[i];
                         let r = vec_r.norm();
                         let theta = (vec_r.z / r).acos();
-                        // field[x][y][z] += phases[i] * p(r, theta, 0.0);
                         field[x][y][z] += p(r, theta, 0.0) * Complex::from_polar(1.0, frame.phases[i]);
                     }
 
@@ -134,7 +133,6 @@ fn main() {
                         let vec_r = point - reflected_transducers[i];
                         let r = vec_r.norm();
                         let theta = (vec_r.z / r).acos();
-                        // field[x][y][z] += phases[i] * p(r, theta, 0.0);
                         field[x][y][z] += p(r, theta, 0.0) * Complex::from_polar(1.0, frame.phases[i]);
                     }
                 }
@@ -145,6 +143,7 @@ fn main() {
         all_times[index] = frame.t;
     }
 
+    println!("Current elapsed time: {:?}", timer.elapsed());
     println!("\nSaving fields to pickles...");
 
     // Save fields to field.pickle
@@ -156,4 +155,6 @@ fn main() {
     let s_2 = serde_pickle::to_vec(&all_times, Default::default()).unwrap();
     let mut file_2 = std::fs::File::create("time.pickle").unwrap();
     file_2.write_all(&s_2).unwrap();
+
+    println!("\nAll done!\nCurrent elapsed time: {:?}", timer.elapsed());
 }

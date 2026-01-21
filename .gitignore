@@ -2,6 +2,7 @@
 /rust/target/
 /rust/field.pickle
 /rust/time.pickle
+/rust/debug/
 
 # Python
 # The venv automatically gitignores itself
