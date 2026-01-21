@@ -104,6 +104,19 @@ fn main() {
         })
         .collect();
 
+    // Initialize points at which to construct pressure field
+    let xs: Vec<f32> = (0..nx)
+        .map(|x| x as f32 * nx_sep + nx_sep / 2.0 + x0)
+        .collect();
+
+    let ys: Vec<f32> = (0..ny)
+        .map(|y| y as f32 * ny_sep + ny_sep / 2.0 + y0)
+        .collect();
+
+    let zs: Vec<f32> = (0..nz)
+        .map(|z| z as f32 * nz_sep + nz_sep / 2.0 + z0)
+        .collect();
+
     let mut all_field = vec![vec![vec![vec![Complex::new(0.0, 0.0); nz]; ny]; nx]; frames.len()];
     let mut all_times = vec![0.0; frames.len()];
 
@@ -113,28 +126,40 @@ fn main() {
 
         let mut field = vec![vec![vec![Complex::new(0.0, 0.0); nz]; ny]; nx];
 
+        // Precompute complex phase factors
+        let phase_factors: Vec<Complex<f32>> =
+            frame.phases.iter()
+            .map(|&phi| Complex::from_polar(1.0, phi))
+            .collect();
+
         for x in 0..nx {
+            let px = xs[x];
+
             for y in 0..ny {
+                let py = ys[y];
+
                 for z in 0..nz {
-                    let point = Point::new(
-                        x as f32 * nx_sep + nx_sep / 2.0 + x0,
-                        y as f32 * ny_sep + ny_sep / 2.0 + y0,
-                        z as f32 * nz_sep + nz_sep / 2.0 + z0,
-                    );
+                    let pz = zs[z];
+
+                    let point = Point::new(px, py, pz);
+
+                    let mut acc = Complex::new(0.0, 0.0);
 
                     for i in 0..transducers.len() {
                         let vec_r = point - transducers[i];
                         let r = vec_r.norm();
                         let theta = (vec_r.z / r).acos();
-                        field[x][y][z] += p(r, theta, 0.0) * Complex::from_polar(1.0, frame.phases[i]);
+                        acc += p(r, theta, 0.0) * phase_factors[i];
                     }
 
                     for i in 0..reflected_transducers.len() {
                         let vec_r = point - reflected_transducers[i];
                         let r = vec_r.norm();
                         let theta = (vec_r.z / r).acos();
-                        field[x][y][z] += p(r, theta, 0.0) * Complex::from_polar(1.0, frame.phases[i]);
+                        acc += p(r, theta, 0.0) * phase_factors[i];
                     }
+
+                    field[x][y][z] = acc;
                 }
             }
         }
