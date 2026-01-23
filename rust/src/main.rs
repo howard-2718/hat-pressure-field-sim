@@ -1,6 +1,6 @@
 mod algo;
 
-use algo::p::p;
+use algo::p::p_modified;
 use algo::hat::Hat;
 use algo::point::Point;
 
@@ -66,9 +66,9 @@ fn main() {
     let ysize = 0.0;
     let zsize = 0.14 - 0.02;
 
-    let nx = 80;
+    let nx = 160;
     let ny = 1;
-    let nz = 80;
+    let nz = 160;
 
     let nx_sep = xsize / nx as f32;
     let ny_sep = ysize / ny as f32;
@@ -148,15 +148,15 @@ fn main() {
                     for i in 0..transducers.len() {
                         let vec_r = point - transducers[i];
                         let r = vec_r.norm();
-                        let theta = (vec_r.z / r).acos();
-                        acc += p(r, theta, 0.0) * phase_factors[i];
+                        let cos_theta = vec_r.z / r;
+                        acc += p_modified(r, cos_theta, 0.0) * phase_factors[i];
                     }
 
                     for i in 0..reflected_transducers.len() {
                         let vec_r = point - reflected_transducers[i];
                         let r = vec_r.norm();
-                        let theta = (vec_r.z / r).acos();
-                        acc += p(r, theta, 0.0) * phase_factors[i];
+                        let cos_theta = vec_r.z / r;
+                        acc += p_modified(r, cos_theta, 0.0) * phase_factors[i];
                     }
 
                     field[x][y][z] = acc;

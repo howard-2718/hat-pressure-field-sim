@@ -23,3 +23,17 @@ pub fn p(r: f32, theta: f32, t: f32) -> Complex<f32> {
         amp * 2.0 * bessel::j_n(1, (K * EMITTER_RADIUS * sin_theta) as f64) as f32 / (K * EMITTER_RADIUS * sin_theta)
     }
 }
+
+// Modified version of p, that takes cos(theta) instead of theta
+pub fn p_modified(r: f32, cos_theta: f32, t: f32) -> Complex<f32> {
+    let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
+
+    let amp: Complex<f32> = Complex::new(0.0, 1.0) * OMEGA * P_0 * EMITTER_RADIUS.powi(2) / (2.0 * r) * Complex::new(0.0, OMEGA * t + K * r).exp();
+    
+    if sin_theta == 0.0 {
+        amp
+    } 
+    else {
+        amp * 2.0 * bessel::j_n(1, (K * EMITTER_RADIUS * sin_theta) as f64) as f32 / (K * EMITTER_RADIUS * sin_theta)
+    }
+}
