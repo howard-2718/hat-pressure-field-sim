@@ -3,6 +3,7 @@ mod algo;
 use algo::p::p_modified;
 use algo::hat::Hat;
 use algo::point::Point;
+use algo::p::REFLEC_COEFF;
 
 use num::complex::Complex;
 use std::io::Write;
@@ -16,9 +17,13 @@ fn main() {
     let distance = 0.16; // Set height between transducers and reflective plate
     let hat = Hat::new(256.0, distance, false); // Initialize phase solver
 
+    // Choose .csv file
+    let csv_filename = "test";
+    // REMEMBER TO ADJUST REFLECTION COEFFICIENT!
+
     // Load in .csv file
     let base = env!("CARGO_MANIFEST_DIR");
-    let filename = format!("{}/pos/{}.csv", base, "test2");
+    let filename = format!("{}/pos/{}.csv", base, csv_filename);
 
     // Read trajectory CSV file
     let mut reader = ReaderBuilder::new().has_headers(true).from_path(&filename).expect("Could not open trajectory data file!");
@@ -53,6 +58,15 @@ fn main() {
 
         frames.push(Frame { t, phases });
     }
+
+    // Save first frame's phases
+    println!("Saving first frame phases");
+
+    let s_ffphases = serde_pickle::to_vec(&(frames[0].phases), Default::default()).unwrap();
+
+    let filename = format!("{}/out/misalign_pos_{}_refcoeff_{}_ffphases.pickle", base, csv_filename, REFLEC_COEFF.to_string());
+    let mut file = std::fs::File::create(filename).unwrap();
+    file.write_all(&s_ffphases).unwrap();
 
     println!("Loaded {} frames, with solved phases", frames.len());
     println!("Current elapsed time: {:?}", timer.elapsed());
@@ -156,7 +170,7 @@ fn main() {
                         let vec_r = point - reflected_transducers[i];
                         let r = vec_r.norm();
                         let cos_theta = vec_r.z / r;
-                        acc += p_modified(r, cos_theta, 0.0) * phase_factors[i];
+                        acc += (REFLEC_COEFF - 0.3) * p_modified(r, cos_theta, 0.0) * phase_factors[i];
                     }
 
                     field[x][y][z] = acc;
@@ -173,12 +187,14 @@ fn main() {
 
     // Save fields to field.pickle
     let s = serde_pickle::to_vec(&all_field, Default::default()).unwrap();
-    let mut file = std::fs::File::create("field.pickle").unwrap();
+    let filename = format!("{}/out/misalign_pos_{}_refcoeff_{}_fields.pickle", base, csv_filename, REFLEC_COEFF.to_string());
+    let mut file = std::fs::File::create(filename).unwrap();
     file.write_all(&s).unwrap();
 
     // Save times to time.pickle
     let s_2 = serde_pickle::to_vec(&all_times, Default::default()).unwrap();
-    let mut file_2 = std::fs::File::create("time.pickle").unwrap();
+    let filename = format!("{}/out/misalign_pos_{}_refcoeff_{}_times.pickle", base, csv_filename, REFLEC_COEFF.to_string());
+    let mut file_2 = std::fs::File::create(filename).unwrap();
     file_2.write_all(&s_2).unwrap();
 
     println!("\nAll done!\nCurrent elapsed time: {:?}", timer.elapsed());

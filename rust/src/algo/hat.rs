@@ -1,7 +1,7 @@
 use num::complex::Complex;
 use std::f32::consts::PI;
 
-use crate::{algo::p::{p, EMITTER_RADIUS, WAVE_LENGTH}, Point};
+use crate::{algo::p::{p, EMITTER_RADIUS, WAVE_LENGTH, REFLEC_COEFF}, Point};
 
 #[derive(Debug)]
 pub struct Vec2D<T> {
@@ -143,11 +143,8 @@ pub fn calc_transducer_phases(transducers: &Vec<Point>, control_points: &Vec<Poi
                 c += t_pressures[j] * propagators.ix(i, j);
             }
 
-            // reflection contributions
-            // TODO: can possibly add a reflection coefficient here to account for imperfect
-            // reflective surface
             for j in 0..t_pressures.len() {
-                c = c + t_pressures[j] * reflected_propagators.ix(i, j);
+                c = c + REFLEC_COEFF * t_pressures[j] * reflected_propagators.ix(i, j);
             }
 
             // each control point has an amplitude of 1 / n
@@ -163,11 +160,8 @@ pub fn calc_transducer_phases(transducers: &Vec<Point>, control_points: &Vec<Poi
                 pl = pl + c_pressures[i] * propagators.ix(i, j).conj();
             }
 
-            // reflection contributions
-            // TODO: can possibly add a reflection coefficient here to account for imperfect
-            // reflective surface
             for i in 0..c_pressures.len() {
-                pl = pl + c_pressures[i] * reflected_propagators.ix(i, j).conj();
+                pl = pl + REFLEC_COEFF * c_pressures[i] * reflected_propagators.ix(i, j).conj();
             }
 
             t_pressures[j] = pl;

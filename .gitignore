@@ -1,9 +1,9 @@
 # Rust
 /rust/target/
-/rust/field.pickle
-/rust/time.pickle
+/rust/*.pickle
 /rust/debug/
+/rust/out/
 
 # Python
 # The venv automatically gitignores itself
-/python/pressure_animation.mp4
+/python/*.mp4
