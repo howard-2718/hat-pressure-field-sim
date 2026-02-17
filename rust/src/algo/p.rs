@@ -10,7 +10,7 @@ const K: f32 = 2.0 * PI / WAVE_LENGTH;
 const P_0: f32 = 1.293; // Density of air
 pub static EMITTER_RADIUS: f32 = 0.005; // Radius of the emitter: 5 mm
 
-pub static REFLEC_COEFF: f32 = 1.0; // Reflection coefficient
+pub static REFLEC_COEFF: f32 = 0.001; // Reflection coefficient
 
 // Far field piston-source model (https://jontallen.ece.illinois.edu/uploads/473.F18/Lectures/Chapter_7b.pdf)
 pub fn p(r: f32, theta: f32, t: f32) -> Complex<f32> {

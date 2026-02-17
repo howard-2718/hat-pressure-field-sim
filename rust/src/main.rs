@@ -64,7 +64,7 @@ fn main() {
 
     let s_ffphases = serde_pickle::to_vec(&(frames[0].phases), Default::default()).unwrap();
 
-    let filename = format!("{}/out/misalign_pos_{}_refcoeff_{}_ffphases.pickle", base, csv_filename, REFLEC_COEFF.to_string());
+    let filename = format!("{}/out/pos_{}_refcoeff_{}_ffphases.pickle", base, csv_filename, REFLEC_COEFF.to_string());
     let mut file = std::fs::File::create(filename).unwrap();
     file.write_all(&s_ffphases).unwrap();
 
@@ -170,7 +170,7 @@ fn main() {
                         let vec_r = point - reflected_transducers[i];
                         let r = vec_r.norm();
                         let cos_theta = vec_r.z / r;
-                        acc += (REFLEC_COEFF - 0.3) * p_modified(r, cos_theta, 0.0) * phase_factors[i];
+                        acc += REFLEC_COEFF * p_modified(r, cos_theta, 0.0) * phase_factors[i];
                     }
 
                     field[x][y][z] = acc;
